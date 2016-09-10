@@ -1,0 +1,14 @@
+Lua bindings to the EditorConfig C Core library.
+
+Check http://editorconfig.org to see how to use EditorConfig.
+
+NOTE: This project is *not* officially supported by EditorConfig in any way.
+
+To build just run "make all". You may need to edit the Makefile for your
+platform. Then place the resulting binary module somewhere in your LUA_CPATH.
+
+To use in your Lua code:
+  ec = require("editorconfig_core")
+  print(ec._VERSION)
+  t = ec.parse("/full/path/to/file")
+  for k, v in pairs(t) do print(string.format("%s = %s", k, v)) end
