@@ -11,4 +11,4 @@ To use in your Lua code:
   ec = require("editorconfig_core")
   print(ec._VERSION)
   t = ec.parse("/full/path/to/file")
-  for k, v in pairs(t) do print(string.format("%s = %s", k, v)) end
+  for _, k in ipairs(t) do print(string.format("%s = %s", k, t[k])) end
