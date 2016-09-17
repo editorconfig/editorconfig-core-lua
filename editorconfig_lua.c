@@ -171,6 +171,8 @@ static int
 lec_parse(lua_State *L)
 {
     const char *full_filename, *conf_file_name;
+    const char *version_to_set;
+    int major = -1, minor = -1, patch = -1;
     editorconfig_handle eh;
     int err_num, name_value_count;
     const char *name, *raw_value;
@@ -178,6 +180,10 @@ lec_parse(lua_State *L)
 
     full_filename = luaL_checkstring(L, 1);
     conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
+    version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
+    if (version_to_set != NULL) {
+        sscanf(version_to_set, "%d.%d.%d", &major, &minor, &patch);
+    }
 
     eh = editorconfig_handle_init();
     if (eh == NULL) {
@@ -185,6 +191,9 @@ lec_parse(lua_State *L)
     }
     if (conf_file_name != NULL) {
         editorconfig_handle_set_conf_file_name(eh, conf_file_name);
+    }
+    if (version_to_set != NULL) {
+        editorconfig_handle_set_version(eh, major, minor, patch);
     }
 
     err_num = editorconfig_parse(full_filename, eh);
