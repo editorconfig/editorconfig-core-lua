@@ -25,12 +25,12 @@ if flags.v or flags.version then print(ec._VERSION); os.exit(0) end
 if #params == 0 then print_usage(1) end
 
 local function run_editorconfig(path, show_header)
-    t = ec.parse(path, flags.f, flags.b)
+    local t, a = ec.parse(path, flags.f, flags.b)
 --    pretty.dump(t)
     if show_header then
         utils.printf("[%s]\n", path)
     end
-    for _, k in ipairs(t) do utils.printf("%s=%s\n", k, t[k]) end
+    for _, k in ipairs(a) do utils.printf("%s=%s\n", k, t[k]) end
 end
 
 local show_header = not (#params == 1)

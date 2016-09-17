@@ -133,8 +133,9 @@ static struct lec_property properties[] = {
     { NULL, NULL }
 };
 
-/* t[kn] = vn */
-/* t[n] = kn */
+/* t1[kn] = vn */
+/* t2[n] = kn */
+/* Receives two tables on the stack */
 static int
 add_name_value(lua_State *L, const char *name, const char *value,
                                                     lua_Integer idx)
@@ -154,7 +155,7 @@ add_name_value(lua_State *L, const char *name, const char *value,
     else if (push_func(L, value) != E_OK) {
         return 0; // Skip
     }
-    lua_setfield(L, -2, name);
+    lua_setfield(L, -3, name);
     lua_pushstring(L, name);
     lua_seti(L, -2, idx);
     return 1;
@@ -165,7 +166,7 @@ static int parse_error(lua_State *L, editorconfig_handle eh, int err_num);
 /* One mandatory argument (full_filename) */
 /* One optional argument (conf_file_name) */
 /*
- * Return : { keys, keys = values }
+ * Return : { keys = values }, { keys }
  */
 static int
 lec_parse(lua_State *L)
@@ -200,9 +201,10 @@ lec_parse(lua_State *L)
     if (err_num != 0) {
         return parse_error(L, eh, err_num);
     }
-    /* Create the EditorConfig parse table */
+    /* Create the EditorConfig parse tables */
     name_value_count = editorconfig_handle_get_name_value_count(eh);
-    lua_createtable(L, name_value_count, name_value_count);
+    lua_createtable(L, 0, name_value_count);
+    lua_createtable(L, name_value_count, 0);
     for (int i = 0; i < name_value_count; i++) {
         name = raw_value = NULL;
         editorconfig_handle_get_name_value(eh, i, &name, &raw_value);
@@ -210,7 +212,7 @@ lec_parse(lua_State *L)
     }
 
     (void)editorconfig_handle_destroy(eh);
-    return 1;
+    return 2;
 }
 
 /*
