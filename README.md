@@ -13,7 +13,7 @@ Note: The EditorConfig Lua Core library is not (yet?) officially supported by th
 Build/install using LuaRocks (recommended):
 
 ```sh
-luarocks build editorconfig-git-1.rockspec
+luarocks build editorconfig-core-git-1.rockspec
 ```
 
 Build/install using CMake:
@@ -26,7 +26,7 @@ make
 make test   #optional
 ```
 
-Then copy the `editorconfig_core.so`binary module to somewhere in your `LUA_CPATH`.
+Then copy the `editorconfig_core.so` binary module to somewhere in your `LUA_CPATH`.
 
 ## Usage
 
