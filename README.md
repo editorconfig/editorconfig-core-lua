@@ -42,7 +42,7 @@ Sometimes it is useful to have the same stable order for each `parse()` invocati
 
 ```lua
 p, k = ec.parse("/full/path/to/file")
-print(#u .. " properties:")
+print(#k .. " properties:")
 for i, v in ipairs(k) do print(string.format("%s: %s=%s", i, v, p[v])) end
 ```
 
