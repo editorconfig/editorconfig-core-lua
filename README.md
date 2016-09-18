@@ -38,7 +38,7 @@ p = ec.parse("/full/path/to/file")
 for k, v in pairs(p) do print(string.format("%s=%s", k, v)) end
 ```
 
-Sometimes it is useful to have the same stable order for each `parse()` invocation that the EditorConfig C Core library provides. For that they property keys are available as an array in a second return value:
+Sometimes it is useful to have the same stable order for each `parse()` invocation that the EditorConfig C Core library provides. For that the property keys are available as an array in a second return value:
 
 ```lua
 p, k = ec.parse("/full/path/to/file")
