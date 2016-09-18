@@ -156,8 +156,9 @@ add_name_value(lua_State *L, const char *name, const char *value,
         return 0; // Skip
     }
     lua_setfield(L, -3, name);
+    lua_pushinteger(L, idx);
     lua_pushstring(L, name);
-    lua_seti(L, -2, idx);
+    lua_settable(L, -3);
     return 1;
 }
 

@@ -14,7 +14,7 @@ EditorConfig makes it easy to maintain the correct coding style when switching b
     license = "BSD",
 }
 dependencies = {
-    "lua >= 5.1",
+    "lua >= 5.2",
 }
 external_dependencies = {
    LIBEDITORCONFIG = {

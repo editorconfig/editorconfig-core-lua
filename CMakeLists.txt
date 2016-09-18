@@ -49,15 +49,11 @@ include(FindEditorConfig)
 find_package(EditorConfig REQUIRED)
 include_directories(SYSTEM ${EDITORCONFIG_INCLUDE_DIRS})
 
-set(Lua_FIND_VERSION_EXACT TRUE)
-set(Lua_FIND_VERSION_COUNT 1)
-set(lua_append_versions 5.3)
+set(Lua_FIND_VERSION 5.2)
 find_package(Lua REQUIRED)
-include_directories(SYSTEM ${LUA_INCLUDE_DIRS})
+include_directories(SYSTEM ${LUA_INCLUDE_DIR})
 
-set(ECL_LUA_INTERPRETER lua
-    CACHE STRING "Lua 5.3 interpreter name (for testing)"
-)
+find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
 
 if (CMAKE_COMPILER_IS_GNUCC)
     set(ECL_COMPILER_FLAGS
@@ -84,5 +80,5 @@ target_link_libraries(editorconfig_core
 configure_file(editorconfig.lua.in editorconfig.lua)
 
 enable_testing()
-set(EDITORCONFIG_CMD ${ECL_LUA_INTERPRETER} ${CMAKE_BINARY_DIR}/editorconfig.lua)
+set(EDITORCONFIG_CMD ${LUA_CMD} ${CMAKE_BINARY_DIR}/editorconfig.lua)
 add_subdirectory(tests)
