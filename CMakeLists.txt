@@ -44,7 +44,6 @@ add_definitions(-DLEC_VERSION="${ECL_VERSION}")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-include(GNUInstallDirs)
 include(FindEditorConfig)
 
 find_package(EditorConfig REQUIRED)
@@ -58,9 +57,6 @@ include_directories(SYSTEM ${LUA_INCLUDE_DIRS})
 
 set(ECL_LUA_INTERPRETER lua
     CACHE STRING "Lua 5.3 interpreter name (for testing)"
-)
-set(ECL_INSTALL_LIBDIR_LUA "${CMAKE_INSTALL_LIBDIR}/lua/5.3"
-    CACHE PATH "Directory for Lua 5.3 module installation"
 )
 
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -86,10 +82,6 @@ target_link_libraries(editorconfig_core
 )
 
 configure_file(editorconfig.lua.in editorconfig.lua)
-
-install(TARGETS editorconfig_core
-    LIBRARY DESTINATION ${ECL_INSTALL_LIBDIR_LUA}
-)
 
 enable_testing()
 set(EDITORCONFIG_CMD ${ECL_LUA_INTERPRETER} ${CMAKE_BINARY_DIR}/editorconfig.lua)
