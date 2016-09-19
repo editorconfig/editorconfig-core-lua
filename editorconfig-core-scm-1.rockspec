@@ -1,7 +1,7 @@
 local _version = "0.1.1-git"
 
 package = "editorconfig-core"
-version = "git-1"
+version = "scm-1"
 source = {
     url = "git@github.com:editorconfig/editorconfig-core-lua.git"
 }
