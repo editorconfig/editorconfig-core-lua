@@ -1,4 +1,4 @@
-local _version = "0.1.1-git"
+local _version = "0.1.2-git"
 
 package = "editorconfig-core"
 version = "scm-1"
