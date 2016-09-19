@@ -3,7 +3,7 @@ local _version = "0.1.1-git"
 package = "editorconfig-core"
 version = "git-1"
 source = {
-    url = "git://github.com/randstr/editorconfig-core-lua.git"
+    url = "git@github.com:editorconfig/editorconfig-core-lua.git"
 }
 description = {
     summary = "EditorConfig support for the Lua language",
