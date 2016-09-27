@@ -37,8 +37,11 @@
 
 #define MSGBUFSIZ   64
 
-#define strequal(s1, s2)    (strcmp((s1), (s2)) == 0)
-#define strncpy0(s1, s2, n) strncpy(memset((s1), 0, n), (s2), n)
+#define strequal(s1, s2) \
+    (strcmp((s1), (s2)) == 0)
+
+#define strncpy0(s1, s2, n) \
+    strncpy(memset((s1), 0, (n)), (s2), (n))
 
 #define E_OK         1
 #define E_NULL       0
@@ -65,14 +68,13 @@ push_ec_boolean(lua_State *L, const char *value)
 {
     if (strequal(value, "true")) {
         lua_pushboolean(L, 1);
+        return E_OK;
     }
-    else if (strequal(value, "false")) {
+    if (strequal(value, "false")) {
         lua_pushboolean(L, 0);
+        return E_OK;
     }
-    else {
-        return E_ERROR;
-    }
-    return E_OK;
+    return E_ERROR;
 }
 
 static err_t
@@ -84,7 +86,7 @@ push_ec_number(lua_State *L, const char *value)
 
     number = strtol(nptr, &endptr, 0);
     if (*nptr == '\0' || *endptr != '\0') {
-        /* Accept al digits dec/hex/octal only */
+        /* Accept all digits in dec/hex/octal only */
         return E_ERROR;
     }
     if (number <= 0) {
@@ -164,15 +166,15 @@ add_name_value(lua_State *L, const char *name, const char *value,
 
 static int parse_error(lua_State *L, editorconfig_handle eh, int err_num);
 
-/* One mandatory argument (full_filename) */
+/* One mandatory argument (file_full_path) */
 /* One optional argument (conf_file_name) */
-/*
- * Return : { keys = values }, { keys }
- */
+/* One optional argument (version_to_set) */
+/* Returns two tables: { keys = values }, { keys } */
 static int
 lec_parse(lua_State *L)
 {
-    const char *full_filename, *conf_file_name;
+    const char *file_full_path;
+    const char *conf_file_name;
     const char *version_to_set;
     int major = -1, minor = -1, patch = -1;
     editorconfig_handle eh;
@@ -180,7 +182,7 @@ lec_parse(lua_State *L)
     const char *name, *raw_value;
     lua_Integer idx = 1;
 
-    full_filename = luaL_checkstring(L, 1);
+    file_full_path = luaL_checkstring(L, 1);
     conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
     version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
     if (version_to_set != NULL) {
@@ -198,7 +200,7 @@ lec_parse(lua_State *L)
         editorconfig_handle_set_version(eh, major, minor, patch);
     }
 
-    err_num = editorconfig_parse(full_filename, eh);
+    err_num = editorconfig_parse(file_full_path, eh);
     if (err_num != 0) {
         return parse_error(L, eh, err_num);
     }
@@ -283,7 +285,7 @@ add_version(lua_State *L)
     lua_setfield(L, -2, "_VERSION");
     editorconfig_get_version(&major, &minor, &patch);
     fmt = "EditorConfig C Core Version %d.%d.%d";
-    lua_pushfstring(L, fmt,major, minor, patch);
+    lua_pushfstring(L, fmt, major, minor, patch);
     lua_setfield(L, -2, "_C_VERSION");
 }
 
