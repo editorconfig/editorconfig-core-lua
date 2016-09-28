@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <editorconfig/editorconfig.h>
 #include "lua.h"
 #include "lauxlib.h"
@@ -188,8 +189,22 @@ static struct lec_property properties[] = {
 };
 
 static err_t
-push_property(lua_State *L, const struct lec_property *prop, const char *value)
+push_property(lua_State *L, const char *name, const char *value)
 {
+    const struct lec_property *prop = NULL;
+
+    lua_pushstring(L, name);
+    for (int i = 0; properties[i].name != NULL; i++) {
+        if (strequal(name, properties[i].name)) {
+            prop = &properties[i];
+            break;
+        }
+    }
+    if (prop == NULL) {
+        // Unknown property
+        lua_pushstring(L, value);
+        return E_OK;
+    }
     if (prop->tokens != NULL) {
         for (enum ec_token *t = prop->tokens; *t != LEC_T_NONE; t++) {
             if (strequal(tokens[*t].value, value)) {
@@ -200,42 +215,57 @@ push_property(lua_State *L, const struct lec_property *prop, const char *value)
             }
         }
     }
-    if (prop->push_func != NULL) {
-        return prop->push_func(L, value);
+    if ((prop->push_func != NULL) &&
+                (prop->push_func(L, value) == E_OK)) {
+        return E_OK;
     }
+    lua_pop(L, 1);
     return E_ERROR;
 }
 
-/* t1[kn] = vn */
-/* t2[n] = kn */
-/* Receives two tables on the stack */
-static int
-add_name_value(lua_State *L, const char *name, const char *value,
-                                                    lua_Integer idx)
+static int parse_error(lua_State *L, int err_num, editorconfig_handle eh);
+
+struct lec_handle {
+    editorconfig_handle eh;
+    lua_Integer count;
+};
+
+/* Receives 3 arguments, two optional */
+static void
+push_udata_handle(lua_State *L)
 {
-    const struct lec_property *prop = NULL;
+    const char *file_full_path;
+    const char *conf_file_name;
+    const char *version_to_set;
+    int major = -1, minor = -1, patch = -1;
+    struct lec_handle *h;
+    int err_num;
 
-    for (int i = 0; properties[i].name != NULL; i++) {
-        if (strequal(name, properties[i].name)) {
-            prop = &properties[i];
-            break;
-        }
+    file_full_path = luaL_checkstring(L, 1);
+    conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
+    version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
+    h = lua_newuserdata(L, sizeof(struct lec_handle));
+    luaL_getmetatable(L, "EditorConfig.iter");
+    lua_setmetatable(L, -2);
+    h->count = 0;
+    h->eh = editorconfig_handle_init();
+    if (h->eh == NULL) {
+        luaL_error(L, "not enough memory to create handle");
+        assert(0);
     }
-    if (prop == NULL) {
-        // Unknown property
-        lua_pushstring(L, value);
+    if (conf_file_name != NULL) {
+        editorconfig_handle_set_conf_file_name(h->eh, conf_file_name);
     }
-    else if (push_property(L, prop, value) != E_OK) {
-        return 0; // Skip
+    if (version_to_set != NULL) {
+        sscanf(version_to_set, "%d.%d.%d", &major, &minor, &patch);
+        editorconfig_handle_set_version(h->eh, major, minor, patch);
     }
-    lua_setfield(L, -3, name);
-    lua_pushinteger(L, idx);
-    lua_pushstring(L, name);
-    lua_settable(L, -3);
-    return 1;
+    err_num = editorconfig_parse(file_full_path, h->eh);
+    if (err_num != 0) {
+        parse_error(L, err_num, h->eh);
+        assert(0);
+    }
 }
-
-static int parse_error(lua_State *L, editorconfig_handle eh, int err_num);
 
 /* One mandatory argument (file_full_path) */
 /* One optional argument (conf_file_name) */
@@ -244,48 +274,32 @@ static int parse_error(lua_State *L, editorconfig_handle eh, int err_num);
 static int
 lec_parse(lua_State *L)
 {
-    const char *file_full_path;
-    const char *conf_file_name;
-    const char *version_to_set;
-    int major = -1, minor = -1, patch = -1;
-    editorconfig_handle eh;
-    int err_num, name_value_count;
+    struct lec_handle *h;
+    int name_value_count;
     const char *name, *raw_value;
-    lua_Integer idx = 1;
 
-    file_full_path = luaL_checkstring(L, 1);
-    conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
-    version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
-    if (version_to_set != NULL) {
-        sscanf(version_to_set, "%d.%d.%d", &major, &minor, &patch);
-    }
-
-    eh = editorconfig_handle_init();
-    if (eh == NULL) {
-        return luaL_error(L, "not enough memory to create handle");
-    }
-    if (conf_file_name != NULL) {
-        editorconfig_handle_set_conf_file_name(eh, conf_file_name);
-    }
-    if (version_to_set != NULL) {
-        editorconfig_handle_set_version(eh, major, minor, patch);
-    }
-
-    err_num = editorconfig_parse(file_full_path, eh);
-    if (err_num != 0) {
-        return parse_error(L, eh, err_num);
-    }
-    /* Create the EditorConfig parse tables */
-    name_value_count = editorconfig_handle_get_name_value_count(eh);
+    push_udata_handle(L);
+    // clear stack with userdata handle only
+    lua_replace(L, 1);
+    lua_settop(L, 1);
+    h = lua_touserdata(L, -1);
+    assert(h != NULL);
+    name_value_count = editorconfig_handle_get_name_value_count(h->eh);
     lua_createtable(L, 0, name_value_count);
     lua_createtable(L, name_value_count, 0);
     for (int i = 0; i < name_value_count; i++) {
         name = raw_value = NULL;
-        editorconfig_handle_get_name_value(eh, i, &name, &raw_value);
-        idx += add_name_value(L, name, raw_value, idx);
+        editorconfig_handle_get_name_value(h->eh, i, &name, &raw_value);
+        if (push_property(L, name, raw_value) != E_OK) {
+            continue; // Skip
+        }
+        lua_setfield(L, -3, name);
+        lua_pushinteger(L, h->count + 1);
+        lua_pushstring(L, name);
+        lua_settable(L, -3);
+        h->count += 1;
     }
 
-    (void)editorconfig_handle_destroy(eh);
     return 2;
 }
 
@@ -327,22 +341,59 @@ parse_error_err_file(editorconfig_handle eh, char *buf, size_t bufsiz)
 }
 
 static int
-parse_error(lua_State *L, editorconfig_handle eh, int err_num)
+parse_error(lua_State *L, int err_num, editorconfig_handle eh)
 {
     char err_msg[MSGBUFSIZ], err_file[MSGBUFSIZ];
-
-    parse_error_msg(err_num, err_msg, sizeof(err_msg));
-    parse_error_err_file(eh, err_file, sizeof(err_file));
-    (void)editorconfig_handle_destroy(eh);
 
     if (err_num == 0) {
         return luaL_error(L, "error code is zero, probably a bug");
     }
+
+    parse_error_msg(err_num, err_msg, sizeof(err_msg));
     if (err_num < 0) {
         return luaL_error(L, "%s", err_msg);
     }
+
     /* EditorConfig parsing error, 'err_num' is the line number */
+    parse_error_err_file(eh, err_file, sizeof(err_file));
     return luaL_error(L, "'%s' at line %d: %s", err_file, err_num, err_msg);
+}
+
+static int lec_iter(lua_State *L);
+
+static int
+lec_iter_open(lua_State *L)
+{
+    push_udata_handle(L);
+    lua_pushcclosure(L, lec_iter, 1);
+    return 1;
+}
+
+static int
+lec_iter(lua_State *L)
+{
+    struct lec_handle *h = lua_touserdata(L, lua_upvalueindex(1));
+    while (1) {
+        if (h->count >= editorconfig_handle_get_name_value_count(h->eh)) {
+            return 0; // stop iteration
+        }
+        const char *name = NULL, *raw_value = NULL;
+        editorconfig_handle_get_name_value(h->eh, h->count, &name, &raw_value);
+        h->count += 1;
+        err_t err = push_property(L, name, raw_value);
+        if (err == E_OK) {
+            return 2;
+        }
+    }
+}
+
+static int
+lec_iter_gc(lua_State *L)
+{
+    struct lec_handle *h = lua_touserdata(L, -1);
+    if (h != NULL)
+        (void)editorconfig_handle_destroy(h->eh);
+    return 0;
 }
 
 static void
@@ -378,6 +429,7 @@ add_tokens(lua_State *L)
 
 static const struct luaL_Reg editorconfig_core[] = {
     {"parse", lec_parse},
+    {"open", lec_iter_open},
     {NULL, NULL}
 };
 
@@ -385,6 +437,9 @@ int luaopen_editorconfig_core (lua_State *L) {
     luaL_newmetatable(L, "EditorConfig.token");
     lua_pushcfunction(L, token_tostring);
     lua_setfield(L, -2, "__tostring");
+    luaL_newmetatable(L, "EditorConfig.iter");
+    lua_pushcfunction(L, lec_iter_gc);
+    lua_setfield(L, -2, "__gc");
     luaL_newlib(L, editorconfig_core);
     add_version(L);
     add_tokens(L);
