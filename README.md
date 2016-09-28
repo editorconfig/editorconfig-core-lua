@@ -28,20 +28,24 @@ Then copy the `editorconfig_core.so` binary module to somewhere in your `LUA_CPA
 
 ## Usage
 
-The `editorconfig_core.parse` module function returns a key/value property table:
+The `open` module function returns an iterator over the property set. Typical usage by plugins would be:
 
 ```lua
 ec = require("editorconfig_core")
-p = ec.parse("/full/path/to/file")
-for k, v in pairs(p) do print(string.format("%s=%s", k, v)) end
+
+for name, value in ec.open("/full/path/to/file") do
+    configure_property[name](value)
+end
 ```
 
-Sometimes it is useful to have the same stable order for each `parse()` invocation that the EditorConfig C Core library provides. For that the property keys are available as an array in a second return value:
+Alternatively the `parse` module function returns a key/value property table. Sometimes it is useful to have the same stable order for each `parse()` invocation that the EditorConfig C Core library provides. For that the property keys are available as an array in a second return value:
 
 ```lua
-p, k = ec.parse("/full/path/to/file")
-print(#k .. " properties:")
-for i, v in ipairs(k) do print(string.format("%s: %s=%s", i, v, p[v])) end
+prop, names = ec.parse("/full/path/to/file")
+print(#names .. " properties:")
+for idx, name in ipairs(names) do
+  print(string.format("%s: %s=%s", idx, name, prop[name]))
+end
 ```
 
-Note the use of the length operator to retrieve the EditorConfig property count for a given file.
+Note also the use of the length operator to retrieve the EditorConfig property count for a given file.
