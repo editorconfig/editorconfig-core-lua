@@ -36,13 +36,8 @@
 #error "LEC_VERSION is not defined."
 #endif
 
-#define MSGBUFSIZ   64
-
 #define strequal(s1, s2) \
     (strcmp((s1), (s2)) == 0)
-
-#define strncpy0(s1, s2, n) \
-    strncpy(memset((s1), 0, (n)), (s2), (n))
 
 #define E_OK         1
 #define E_NULL       0
@@ -223,7 +218,7 @@ push_property(lua_State *L, const char *name, const char *value)
     return E_ERROR;
 }
 
-static int parse_error(lua_State *L, int err_num, editorconfig_handle eh);
+static int parse_error(lua_State *L, int err_num, const char *err_file);
 
 struct lec_handle {
     editorconfig_handle eh;
@@ -262,7 +257,7 @@ push_udata_handle(lua_State *L)
     }
     err_num = editorconfig_parse(file_full_path, h->eh);
     if (err_num != 0) {
-        parse_error(L, err_num, h->eh);
+        parse_error(L, err_num, editorconfig_handle_get_err_file(h->eh));
         assert(0);
     }
 }
@@ -307,56 +302,35 @@ lec_parse(lua_State *L)
  * Don't use "editorconfig_get_error_msg".
  * Error codes: https://github.com/editorconfig/editorconfig-core-c/blob/master/src/lib/editorconfig.c
  */
-static void
-parse_error_msg(int err_num, char *buf, size_t bufsiz)
-{
-    const char *msg;
-
-    if (err_num == 0)
-        msg = "no error occurred";
-    else if(err_num > 0)
-        msg = "failed to parse file";
-    else if (err_num == EDITORCONFIG_PARSE_NOT_FULL_PATH)
-        msg = "input file must be a full path name";
-    else if (err_num == EDITORCONFIG_PARSE_MEMORY_ERROR)
-        msg = "memory error";
-    else if (err_num == EDITORCONFIG_PARSE_VERSION_TOO_NEW)
-        msg = "required version is greater than the current version";
-    else
-        msg = "unknown error";
-
-    strncpy0(buf, msg, bufsiz);
-}
-
-static void
-parse_error_err_file(editorconfig_handle eh, char *buf, size_t bufsiz)
-{
-    const char *err_file;
-
-    err_file = editorconfig_handle_get_err_file(eh);
-    if (err_file == NULL)
-        err_file = "<null>";
-
-    strncpy0(buf, err_file, bufsiz);
-}
-
 static int
-parse_error(lua_State *L, int err_num, editorconfig_handle eh)
+parse_error(lua_State *L, int err_num, const char *err_file)
 {
-    char err_msg[MSGBUFSIZ], err_file[MSGBUFSIZ];
+    const char *err_msg;
 
     if (err_num == 0) {
-        return luaL_error(L, "error code is zero, probably a bug");
+        assert(0);
+        return luaL_error(L, "no error occurred");
     }
-
-    parse_error_msg(err_num, err_msg, sizeof(err_msg));
-    if (err_num < 0) {
-        return luaL_error(L, "%s", err_msg);
+    if (err_num > 0) {
+        /* EditorConfig parsing error, 'err_num' is the line number */
+        return luaL_error(L, "'%s' at line %d: failed to parse file",
+                        err_file ? err_file : "<null>", err_num);
     }
-
-    /* EditorConfig parsing error, 'err_num' is the line number */
-    parse_error_err_file(eh, err_file, sizeof(err_file));
-    return luaL_error(L, "'%s' at line %d: %s", err_file, err_num, err_msg);
+    switch (err_num) {
+        case EDITORCONFIG_PARSE_NOT_FULL_PATH:
+            err_msg = "input file must be a full path name";
+            break;
+        case EDITORCONFIG_PARSE_MEMORY_ERROR:
+            err_msg = "memory error";
+            break;
+        case EDITORCONFIG_PARSE_VERSION_TOO_NEW:
+            err_msg = "required version is greater than the current version";
+            break;
+        default:
+            err_msg = "unknown error";
+            break;
+    }
+    return luaL_error(L, "%s", err_msg);
 }
 
 static int lec_iter(lua_State *L);
