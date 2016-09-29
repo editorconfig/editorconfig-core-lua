@@ -30,7 +30,7 @@ project(editorconfig-core-lua C)
 
 option(WERROR "Enable warnings as errors" OFF)
 
-set(ECL_VERSION 0.1.2)
+set(ECL_VERSION 0.2.0)
 set(ECL_VERSION_SUFFIX "" CACHE STRING "Optional extra version suffix.")
 if(DEFINED VERSION_SUFFIX)
     set(ECL_VERSION "${ECL_VERSION}${VERSION_SUFFIX}")
