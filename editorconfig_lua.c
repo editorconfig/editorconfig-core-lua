@@ -220,11 +220,6 @@ push_property(lua_State *L, const char *name, const char *value)
 
 static int parse_error(lua_State *L, int err_num, const char *err_file);
 
-struct lec_handle {
-    editorconfig_handle eh;
-    lua_Integer count;
-};
-
 /* Receives 3 arguments, two optional */
 static void
 push_udata_handle(lua_State *L)
@@ -233,32 +228,33 @@ push_udata_handle(lua_State *L)
     const char *conf_file_name;
     const char *version_to_set;
     int major = -1, minor = -1, patch = -1;
-    struct lec_handle *h;
+    editorconfig_handle *ehp, eh;
     int err_num;
 
     file_full_path = luaL_checkstring(L, 1);
     conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
     version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
-    h = lua_newuserdata(L, sizeof(struct lec_handle));
+    ehp = lua_newuserdata(L, sizeof(editorconfig_handle));
     luaL_getmetatable(L, "EditorConfig.iter");
     lua_setmetatable(L, -2);
-    h->count = 0;
-    h->eh = editorconfig_handle_init();
-    if (h->eh == NULL) {
+    *ehp = editorconfig_handle_init();
+    if (*ehp == NULL) {
         luaL_error(L, "not enough memory to create handle");
-        assert(0);
+        return; //not reached
     }
+
+    eh = *ehp;
     if (conf_file_name != NULL) {
-        editorconfig_handle_set_conf_file_name(h->eh, conf_file_name);
+        editorconfig_handle_set_conf_file_name(eh, conf_file_name);
     }
     if (version_to_set != NULL) {
         sscanf(version_to_set, "%d.%d.%d", &major, &minor, &patch);
-        editorconfig_handle_set_version(h->eh, major, minor, patch);
+        editorconfig_handle_set_version(eh, major, minor, patch);
     }
-    err_num = editorconfig_parse(file_full_path, h->eh);
+    err_num = editorconfig_parse(file_full_path, eh);
     if (err_num != 0) {
-        parse_error(L, err_num, editorconfig_handle_get_err_file(h->eh));
-        assert(0);
+        parse_error(L, err_num, editorconfig_handle_get_err_file(eh));
+        return; //not reached
     }
 }
 
@@ -269,32 +265,34 @@ push_udata_handle(lua_State *L)
 static int
 lec_parse(lua_State *L)
 {
-    struct lec_handle *h;
+    editorconfig_handle *ehp, eh;
     int name_value_count;
-    const char *name, *raw_value;
+    const char *name, *value;
+    lua_Integer idx = 1;
 
     push_udata_handle(L);
     // clear stack with userdata handle only
     lua_replace(L, 1);
     lua_settop(L, 1);
-    h = lua_touserdata(L, -1);
-    assert(h != NULL);
-    name_value_count = editorconfig_handle_get_name_value_count(h->eh);
+    ehp = lua_touserdata(L, -1);
+    assert(ehp != NULL);
+
+    eh = *ehp;
+    name_value_count = editorconfig_handle_get_name_value_count(eh);
     lua_createtable(L, 0, name_value_count);
     lua_createtable(L, name_value_count, 0);
     for (int i = 0; i < name_value_count; i++) {
-        name = raw_value = NULL;
-        editorconfig_handle_get_name_value(h->eh, i, &name, &raw_value);
-        if (push_property(L, name, raw_value) != E_OK) {
+        name = value = NULL;
+        editorconfig_handle_get_name_value(eh, i, &name, &value);
+        if (push_property(L, name, value) != E_OK) {
             continue; // Skip
         }
         lua_setfield(L, -3, name);
-        lua_pushinteger(L, h->count + 1);
+        lua_pushinteger(L, idx);
         lua_pushstring(L, name);
         lua_settable(L, -3);
-        h->count += 1;
+        idx += 1;
     }
-
     return 2;
 }
 
@@ -339,23 +337,29 @@ static int
 lec_iter_open(lua_State *L)
 {
     push_udata_handle(L);
-    lua_pushcclosure(L, lec_iter, 1);
+    lua_pushinteger(L, 0); // count
+    lua_pushcclosure(L, lec_iter, 2);
     return 1;
 }
 
 static int
 lec_iter(lua_State *L)
 {
-    struct lec_handle *h = lua_touserdata(L, lua_upvalueindex(1));
+    editorconfig_handle *ehp = lua_touserdata(L, lua_upvalueindex(1));
+    lua_Integer count = lua_tointeger(L, lua_upvalueindex(2));
+    const char *name, *value;
+
     while (1) {
-        if (h->count >= editorconfig_handle_get_name_value_count(h->eh)) {
+        if (count >= editorconfig_handle_get_name_value_count(*ehp)) {
             return 0; // stop iteration
         }
-        const char *name = NULL, *raw_value = NULL;
-        editorconfig_handle_get_name_value(h->eh, h->count, &name, &raw_value);
-        h->count += 1;
-        err_t err = push_property(L, name, raw_value);
+        name = value = NULL;
+        editorconfig_handle_get_name_value(*ehp, count, &name, &value);
+        count += 1;
+        err_t err = push_property(L, name, value);
         if (err == E_OK) {
+            lua_pushinteger(L, count);
+            lua_replace(L, lua_upvalueindex(2));
             return 2;
         }
     }
@@ -364,9 +368,9 @@ lec_iter(lua_State *L)
 static int
 lec_iter_gc(lua_State *L)
 {
-    struct lec_handle *h = lua_touserdata(L, -1);
-    if (h != NULL)
-        (void)editorconfig_handle_destroy(h->eh);
+    editorconfig_handle *ehp = lua_touserdata(L, -1);
+    if (ehp != NULL)
+        (void)editorconfig_handle_destroy(*ehp);
     return 0;
 }
 
