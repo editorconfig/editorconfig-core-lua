@@ -221,8 +221,8 @@ push_property(lua_State *L, const char *name, const char *value)
 static int parse_error(lua_State *L, int err_num, const char *err_file);
 
 /* Receives 3 arguments, two optional */
-static void
-push_udata_handle(lua_State *L)
+static int
+push_ec_handle(lua_State *L)
 {
     const char *file_full_path;
     const char *conf_file_name;
@@ -239,8 +239,7 @@ push_udata_handle(lua_State *L)
     lua_setmetatable(L, -2);
     *ehp = editorconfig_handle_init();
     if (*ehp == NULL) {
-        luaL_error(L, "not enough memory to create handle");
-        return; //not reached
+        return luaL_error(L, "not enough memory to create handle");
     }
 
     eh = *ehp;
@@ -253,9 +252,17 @@ push_udata_handle(lua_State *L)
     }
     err_num = editorconfig_parse(file_full_path, eh);
     if (err_num != 0) {
-        parse_error(L, err_num, editorconfig_handle_get_err_file(eh));
-        return; //not reached
+        return parse_error(L, err_num, editorconfig_handle_get_err_file(eh));
     }
+    return 1;
+}
+
+static void
+open_ec_handle(lua_State *L, int nargs)
+{
+    lua_pushcfunction(L, push_ec_handle);
+    lua_insert(L, -(nargs+1));
+    lua_call(L, nargs, 1);
 }
 
 /* One mandatory argument (file_full_path) */
@@ -270,10 +277,7 @@ lec_parse(lua_State *L)
     const char *name, *value;
     lua_Integer idx = 1;
 
-    push_udata_handle(L);
-    // clear stack with userdata handle only
-    lua_replace(L, 1);
-    lua_settop(L, 1);
+    open_ec_handle(L, lua_gettop(L));
     ehp = lua_touserdata(L, -1);
     assert(ehp != NULL);
 
@@ -287,10 +291,13 @@ lec_parse(lua_State *L)
         if (push_property(L, name, value) != E_OK) {
             continue; // Skip
         }
-        lua_setfield(L, -3, name);
+        lua_pushvalue(L, -2);
+        lua_pushvalue(L, -2);
+        lua_settable(L, 2);
         lua_pushinteger(L, idx);
-        lua_pushstring(L, name);
-        lua_settable(L, -3);
+        lua_pushvalue(L, -3);
+        lua_settable(L, 3);
+        lua_pop(L, 2);
         idx += 1;
     }
     return 2;
@@ -331,19 +338,19 @@ parse_error(lua_State *L, int err_num, const char *err_file)
     return luaL_error(L, "%s", err_msg);
 }
 
-static int lec_iter(lua_State *L);
+static int lec_iter_next(lua_State *L);
 
 static int
 lec_iter_open(lua_State *L)
 {
-    push_udata_handle(L);
+    open_ec_handle(L, lua_gettop(L));
     lua_pushinteger(L, 0); // count
-    lua_pushcclosure(L, lec_iter, 2);
+    lua_pushcclosure(L, lec_iter_next, 2);
     return 1;
 }
 
 static int
-lec_iter(lua_State *L)
+lec_iter_next(lua_State *L)
 {
     editorconfig_handle *ehp = lua_touserdata(L, lua_upvalueindex(1));
     lua_Integer count = lua_tointeger(L, lua_upvalueindex(2));
