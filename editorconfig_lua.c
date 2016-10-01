@@ -218,8 +218,6 @@ push_property(lua_State *L, const char *name, const char *value)
     return E_ERROR;
 }
 
-static int parse_error(lua_State *L, int err_num, const char *err_file);
-
 /* Receives 3 arguments, two optional */
 static int
 push_ec_handle(lua_State *L)
@@ -252,7 +250,13 @@ push_ec_handle(lua_State *L)
     }
     err_num = editorconfig_parse(file_full_path, eh);
     if (err_num != 0) {
-        return parse_error(L, err_num, editorconfig_handle_get_err_file(eh));
+        const char *err_msg = editorconfig_get_error_msg(err_num);
+        if (err_num > 0) {
+            const char *err_file = editorconfig_handle_get_err_file(eh);
+            return luaL_error(L, "'%s' at line %d: %s",
+                        err_file ? err_file : "<null>", err_num, err_msg);
+        }
+        return luaL_error(L, "%s", err_msg);
     }
     return 1;
 }
@@ -301,41 +305,6 @@ lec_parse(lua_State *L)
         idx += 1;
     }
     return 2;
-}
-
-/*
- * Don't use "editorconfig_get_error_msg".
- * Error codes: https://github.com/editorconfig/editorconfig-core-c/blob/master/src/lib/editorconfig.c
- */
-static int
-parse_error(lua_State *L, int err_num, const char *err_file)
-{
-    const char *err_msg;
-
-    if (err_num == 0) {
-        assert(0);
-        return luaL_error(L, "no error occurred");
-    }
-    if (err_num > 0) {
-        /* EditorConfig parsing error, 'err_num' is the line number */
-        return luaL_error(L, "'%s' at line %d: failed to parse file",
-                        err_file ? err_file : "<null>", err_num);
-    }
-    switch (err_num) {
-        case EDITORCONFIG_PARSE_NOT_FULL_PATH:
-            err_msg = "input file must be a full path name";
-            break;
-        case EDITORCONFIG_PARSE_MEMORY_ERROR:
-            err_msg = "memory error";
-            break;
-        case EDITORCONFIG_PARSE_VERSION_TOO_NEW:
-            err_msg = "required version is greater than the current version";
-            break;
-        default:
-            err_msg = "unknown error";
-            break;
-    }
-    return luaL_error(L, "%s", err_msg);
 }
 
 static int lec_iter_next(lua_State *L);
