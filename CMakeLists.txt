@@ -80,5 +80,37 @@ target_link_libraries(editorconfig_core
 configure_file(editorconfig.lua.in editorconfig.lua)
 
 enable_testing()
-set(EDITORCONFIG_CMD ${LUA_CMD} ${CMAKE_BINARY_DIR}/editorconfig.lua)
-add_subdirectory(tests)
+set(EDITORCONFIG_CMD_OPEN ${LUA_CMD} ${CMAKE_BINARY_DIR}/editorconfig.lua --open)
+set(EDITORCONFIG_CMD_PARSE ${LUA_CMD} ${CMAKE_BINARY_DIR}/editorconfig.lua --parse)
+
+#
+# Functions from tests/CMakeLists.txt
+#
+## The most common test function
+function(new_ec_test name ec_file src_file regex)
+    add_test(${name}-open ${EDITORCONFIG_CMD_OPEN} -f ${ec_file}
+        "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+    add_test(${name}-parse ${EDITORCONFIG_CMD_PARSE} -f ${ec_file}
+        "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+    set_tests_properties(${name}-open ${name}-parse PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
+endfunction()
+## The tests that requires version specified
+function(new_ec_test_version name ec_file src_file regex version)
+    add_test(${name}-open ${EDITORCONFIG_CMD_OPEN} -b ${version} -f ${ec_file}
+        "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+    add_test(${name}-parse ${EDITORCONFIG_CMD_PARSE} -b ${version} -f ${ec_file}
+        "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+    set_tests_properties(${name}-open ${name}-parse PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
+endfunction()
+## The tests that requires the full path EditorConfig files
+function(new_ec_test_full_ec_file_path name ec_file src_file regex)
+    add_test(${name}-open ${EDITORCONFIG_CMD_OPEN} -f ${ec_file} "${src_file}")
+    add_test(${name}-parse ${EDITORCONFIG_CMD_PARSE} -f ${ec_file} "${src_file}")
+    set_tests_properties(${name}-open ${name}-parse PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
+endfunction()
+
+add_subdirectory(tests/glob)
+add_subdirectory(tests/properties)
+add_subdirectory(tests/parser)
+add_subdirectory(tests/filetree)
+#add_subdirectory(tests/cli)

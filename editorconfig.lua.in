@@ -28,8 +28,15 @@ local function run_editorconfig(path, show_header)
     if show_header then
         utils.printf("[%s]\n", path)
     end
-    for k, v in ec.open(path, flags.f, flags.b) do
-        utils.printf("%s=%s\n", k, v)
+    if flags.open then
+        for k, v in ec.open(path, flags.f, flags.b) do
+            utils.printf("%s=%s\n", k, v)
+        end
+    else
+        local props, names = ec.parse(path, flags.f, flags.b)
+        for _, k in ipairs(names) do
+            utils.printf("%s=%s\n", k, props[k])
+        end
     end
 end
 
