@@ -219,8 +219,8 @@ push_property(lua_State *L, const char *name, const char *value)
 }
 
 /* Receives 3 arguments, two optional */
-static int
-push_ec_handle(lua_State *L)
+static editorconfig_handle
+open_ec_handle(lua_State *L)
 {
     const char *file_full_path;
     const char *conf_file_name;
@@ -232,15 +232,14 @@ push_ec_handle(lua_State *L)
     file_full_path = luaL_checkstring(L, 1);
     conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
     version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
+    lua_settop(L, 0);
     ehp = lua_newuserdata(L, sizeof(editorconfig_handle));
     luaL_getmetatable(L, "EditorConfig.handle");
     lua_setmetatable(L, -2);
-    *ehp = editorconfig_handle_init();
-    if (*ehp == NULL) {
-        return luaL_error(L, "not enough memory to create handle");
+    *ehp = eh = editorconfig_handle_init();
+    if (eh == NULL) {
+        luaL_error(L, "not enough memory to create handle");
     }
-
-    eh = *ehp;
     if (conf_file_name != NULL) {
         editorconfig_handle_set_conf_file_name(eh, conf_file_name);
     }
@@ -253,20 +252,12 @@ push_ec_handle(lua_State *L)
         const char *err_msg = editorconfig_get_error_msg(err_num);
         if (err_num > 0) {
             const char *err_file = editorconfig_handle_get_err_file(eh);
-            return luaL_error(L, "'%s' at line %d: %s",
+            luaL_error(L, "'%s' at line %d: %s",
                         err_file ? err_file : "<null>", err_num, err_msg);
         }
-        return luaL_error(L, "%s", err_msg);
+        luaL_error(L, "%s", err_msg);
     }
-    return 1;
-}
-
-static void
-open_ec_handle(lua_State *L, int nargs)
-{
-    lua_pushcfunction(L, push_ec_handle);
-    lua_insert(L, -(nargs+1));
-    lua_call(L, nargs, 1);
+    return eh;
 }
 
 /* One mandatory argument (file_full_path) */
@@ -276,16 +267,13 @@ open_ec_handle(lua_State *L, int nargs)
 static int
 lec_parse(lua_State *L)
 {
-    editorconfig_handle *ehp, eh;
+    editorconfig_handle eh;
     int name_value_count;
     const char *name, *value;
     lua_Integer idx = 1;
 
-    open_ec_handle(L, lua_gettop(L));
-    ehp = lua_touserdata(L, -1);
-    assert(ehp != NULL);
-
-    eh = *ehp;
+    eh = open_ec_handle(L);
+    assert(eh != NULL);
     name_value_count = editorconfig_handle_get_name_value_count(eh);
     lua_createtable(L, 0, name_value_count);
     lua_createtable(L, name_value_count, 0);
@@ -312,7 +300,7 @@ static int lec_iter_next(lua_State *L);
 static int
 lec_iter_open(lua_State *L)
 {
-    open_ec_handle(L, lua_gettop(L));
+    open_ec_handle(L);
     lua_pushinteger(L, 0); // count
     lua_pushcclosure(L, lec_iter_next, 2);
     return 1;
