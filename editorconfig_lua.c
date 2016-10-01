@@ -233,7 +233,7 @@ push_ec_handle(lua_State *L)
     conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
     version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
     ehp = lua_newuserdata(L, sizeof(editorconfig_handle));
-    luaL_getmetatable(L, "EditorConfig.iter");
+    luaL_getmetatable(L, "EditorConfig.handle");
     lua_setmetatable(L, -2);
     *ehp = editorconfig_handle_init();
     if (*ehp == NULL) {
@@ -342,7 +342,7 @@ lec_iter_next(lua_State *L)
 }
 
 static int
-lec_iter_gc(lua_State *L)
+lec_handle_gc(lua_State *L)
 {
     editorconfig_handle *ehp = lua_touserdata(L, -1);
     if (ehp != NULL)
@@ -391,8 +391,8 @@ int luaopen_editorconfig_core (lua_State *L) {
     luaL_newmetatable(L, "EditorConfig.token");
     lua_pushcfunction(L, token_tostring);
     lua_setfield(L, -2, "__tostring");
-    luaL_newmetatable(L, "EditorConfig.iter");
-    lua_pushcfunction(L, lec_iter_gc);
+    luaL_newmetatable(L, "EditorConfig.handle");
+    lua_pushcfunction(L, lec_handle_gc);
     lua_setfield(L, -2, "__gc");
     luaL_newlib(L, editorconfig_core);
     add_version(L);
