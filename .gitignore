@@ -1,2 +1,6 @@
 *.o
 *.so
+*.rock
+
+build/
+build.luarocks/
