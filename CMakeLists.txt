@@ -30,11 +30,10 @@ project(editorconfig-core-lua VERSION 0.3.0 LANGUAGES C)
 
 set(LEC_VERSION "${PROJECT_VERSION}-git")
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
-include(FindEditorConfig)
 include(GNUInstallDirs)
 
-find_package(EditorConfig REQUIRED)
+find_package(EditorConfig CONFIG REQUIRED)
+
 set(Lua_FIND_VERSION 5.2) # minimum Lua version
 find_package(Lua REQUIRED)
 
@@ -51,10 +50,10 @@ if(CMAKE_COMPILER_IS_GNUCC)
     )
 endif()
 target_include_directories(editorconfig_core SYSTEM
-    PRIVATE ${EDITORCONFIG_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
+    PRIVATE ${LUA_INCLUDE_DIR}
 )
 target_link_libraries(editorconfig_core
-    ${EDITORCONFIG_LIBRARIES}
+    editorconfig_shared
 )
 # Omit the lib<name>.so prefix from the DSO
 set_target_properties(editorconfig_core PROPERTIES
