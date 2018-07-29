@@ -1,10 +1,16 @@
 # EditorConfig Lua Core
 
-EditorConfig Lua Core provides the same functionality as the [EditorConfig C Core](https://github.com/editorconfig/editorconfig-core-c) library.
+EditorConfig Lua Core provides the same functionality as the
+[EditorConfig C Core][1] library.
 
 ## EditorConfig Project
 
-EditorConfig makes it easy to maintain the correct coding style when switching between different text editors and between different projects. The EditorConfig project maintains a file format and plugins for various text editors which allow this file format to be read and used by those editors. For information on the file format and supported text editors, see the [EditorConfig website](http://editorconfig.org>).
+EditorConfig makes it easy to maintain the correct coding style when switching
+between different text editors and between different projects. The EditorConfig
+project maintains a file format and plugins for various text editors which
+allow this file format to be read and used by those editors. For information
+on the file format and supported text editors, see the [EditorConfig][2]
+website.
 
 ## Installation
 
@@ -30,14 +36,16 @@ make
 make test   # optional
 ```
 
-Then copy the `editorconfig_core.so` binary module to somewhere in your `LUA_CPATH`.
+Then copy the `editorconfig_core.so` binary module to somewhere in
+your `LUA_CPATH`.
 
 To be able to run the tests you may have to update the git submodule
 with `git submodule update --init`.
 
 ## Usage
 
-The `open` module function returns an iterator over the property set. Typical usage by plugins would be:
+The `open` module function returns an iterator over the property set. Typical
+usage by plugins would be:
 
 ```lua
 ec = require("editorconfig_core")
@@ -47,7 +55,10 @@ for name, value in ec.open("/full/path/to/file") do
 end
 ```
 
-Alternatively the `parse` module function returns a key/value property table. Sometimes it is useful to have the same stable order for each `parse()` invocation that the EditorConfig C Core library provides. For that the property keys are available as an array in a second return value:
+Alternatively the `parse` module function returns a key/value property table.
+Sometimes it is useful to have the same stable order for each `parse()`
+invocation that the EditorConfig C Core library provides. For that the property
+keys are available as an array in a second return value:
 
 ```lua
 prop, names = ec.parse("/full/path/to/file")
@@ -57,4 +68,8 @@ for idx, name in ipairs(names) do
 end
 ```
 
-Note also the use of the length operator to retrieve the EditorConfig property count for a given file.
+Note also the use of the length operator to retrieve the EditorConfig
+property count for a given file.
+
+[1]: https://github.com/editorconfig/editorconfig-core-c
+[2]: https://editorconfig.org
