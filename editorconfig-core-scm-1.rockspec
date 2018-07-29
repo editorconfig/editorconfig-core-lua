@@ -1,5 +1,3 @@
-local _version = "0.3.0-git"
-
 package = "editorconfig-core"
 version = "scm-1"
 source = {
@@ -16,20 +14,10 @@ EditorConfig makes it easy to maintain the correct coding style when switching b
 dependencies = {
     "lua >= 5.2",
 }
-external_dependencies = {
-   LIBEDITORCONFIG = {
-      header = "editorconfig/editorconfig.h"
-   }
-}
 build = {
-    type = "builtin",
-    modules = {
-        editorconfig_core = {
-            sources = {"editorconfig_lua.c"},
-            defines = {"LEC_VERSION=\"".._version.."\""},
-            libraries = {"editorconfig"},
-            incdirs = {"$(LIBEDITORCONFIG_INCDIR)"},
-            libdirs = {"$(LIBEDITORCONFIG_LIBDIR)"},
-        }
-    }
+    type = "cmake",
+    variables = {
+        CMAKE_INSTALL_PREFIX = "$(PREFIX)",
+        ECL_LIBDIR = "$(LIBDIR)",
+    },
 }

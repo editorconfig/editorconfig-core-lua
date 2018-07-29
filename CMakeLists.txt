@@ -51,6 +51,14 @@ target_link_libraries(editorconfig_core
     ${EDITORCONFIG_LIBRARIES} ${LUA_LIBRARIES}
 )
 
+set(ECL_LIBDIR "lib/lua/${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}"
+    CACHE PATH "Target installation directory."
+)
+
+install(TARGETS editorconfig_core
+    DESTINATION ${ECL_LIBDIR}
+)
+
 find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
 configure_file(editorconfig.lua.in editorconfig.lua)
 enable_testing()
