@@ -32,6 +32,9 @@ make test   # optional
 
 Then copy the `editorconfig_core.so` binary module to somewhere in your `LUA_CPATH`.
 
+To be able to run the tests you may have to update the git submodule
+with `git submodule update --init`.
+
 ## Usage
 
 The `open` module function returns an iterator over the property set. Typical usage by plugins would be:
