@@ -8,20 +8,26 @@ EditorConfig makes it easy to maintain the correct coding style when switching b
 
 ## Installation
 
-Build/install using LuaRocks (recommended):
+#### Build using LuaRocks
 
-```sh
-luarocks make
+```
+luarocks make --pack-binary-rock
 ```
 
-Build/install using CMake:
+Then install the binary rock file, e.g:
 
-```sh
-mkdir cmbuild
-cd cmbuild
+```
+luarocks --local install editorconfig-core-scm-1.linux-x86_64.rock
+```
+
+#### Build using CMake
+
+```
+mkdir build
+cd build
 cmake ..
 make
-make test   #optional
+make test   # optional
 ```
 
 Then copy the `editorconfig_core.so` binary module to somewhere in your `LUA_CPATH`.
