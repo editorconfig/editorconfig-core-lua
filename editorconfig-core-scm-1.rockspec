@@ -5,9 +5,12 @@ source = {
 }
 description = {
     summary = "EditorConfig support for the Lua language",
-    detailed = [[
-EditorConfig makes it easy to maintain the correct coding style when switching between different text editors and between different projects. The EditorConfig project maintains a file format and plugins for various text editors which allow this file format to be read and used by those editors. EditorConfig Lua Core provides the same functionality as the Editorconfig C Core library.
-]],
+    detailed = "EditorConfig makes it easy to maintain the correct \z
+coding style when switching between different text editors and \z
+betweendifferent projects. The EditorConfig project maintains a file \z
+format and plugins for various text editors which allow this file \z
+format to be read and used by those editors. EditorConfig Lua Core \z
+provides the same functionality as the Editorconfig C Core library.",
     homepage = "http://editorconfig.org",
     license = "BSD",
 }
