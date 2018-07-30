@@ -32,6 +32,7 @@ set(LEC_VERSION "${PROJECT_VERSION}-git")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 include(FindEditorConfig)
+include(GNUInstallDirs)
 
 find_package(EditorConfig REQUIRED)
 set(Lua_FIND_VERSION 5.2) # minimum Lua version
@@ -55,7 +56,7 @@ set_target_properties(editorconfig_core PROPERTIES
     PREFIX ""
 )
 
-set(ECL_LIBDIR "lib/lua/${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}"
+set(ECL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/lua/${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}"
     CACHE PATH "Target installation directory."
 )
 
