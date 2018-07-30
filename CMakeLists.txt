@@ -66,7 +66,7 @@ install(TARGETS editorconfig_core
 configure_file(editorconfig.lua.in editorconfig.lua)
 
 # Testing. Type "make test" to run tests. Only if the test submodule is
-# checkouted should we do this
+# checked out should we do this.
 if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
     enable_testing()
     find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
@@ -74,5 +74,5 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
     add_subdirectory(tests)
 else()
     message(WARNING
-        " Testing files are not found. Testing will not be available. If you obtained the source tree through git, please run `git submodule update --init` to update the tests submodule.")
+        "Testing files not found. Testing will not be available. If you obtained the source tree through git, please run 'git submodule update --init' to update the tests submodule.")
 endif()
