@@ -50,6 +50,9 @@ target_include_directories(editorconfig_core SYSTEM
 target_link_libraries(editorconfig_core
     ${EDITORCONFIG_LIBRARIES} ${LUA_LIBRARIES}
 )
+set_target_properties(editorconfig_core PROPERTIES
+    PREFIX ""
+)
 
 set(ECL_LIBDIR "lib/lua/${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}"
     CACHE PATH "Target installation directory."
