@@ -64,14 +64,13 @@ install(TARGETS editorconfig_core
     DESTINATION ${ECL_LIBDIR}
 )
 
-configure_file(editorconfig.lua.in editorconfig.lua)
-
 # Testing. Type "make test" to run tests. Only if the test submodule is
 # checked out should we do this.
 if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
     enable_testing()
     find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
-    set(EDITORCONFIG_CMD ${LUA_CMD} ${CMAKE_BINARY_DIR}/editorconfig.lua)
+    configure_file(test_ec.sh.in test_ec.sh @ONLY)
+    set(EDITORCONFIG_CMD ${CMAKE_BINARY_DIR}/test_ec.sh)
     add_subdirectory(tests)
 else()
     message(WARNING

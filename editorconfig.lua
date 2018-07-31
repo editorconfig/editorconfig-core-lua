@@ -1,6 +1,4 @@
 
-package.cpath = "${CMAKE_BINARY_DIR}/?.so;" .. package.cpath
-
 require("pl")
 ec = require("editorconfig_core")
 

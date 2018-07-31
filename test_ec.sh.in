@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export LUA_CPATH="@CMAKE_BINARY_DIR@/?.so;${LUA_CPATH}"
+
+@LUA_CMD@ "@CMAKE_SOURCE_DIR@/editorconfig.lua" "$@"
