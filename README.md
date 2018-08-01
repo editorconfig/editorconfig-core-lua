@@ -44,21 +44,20 @@ with `git submodule update --init`.
 
 ## Usage
 
-The `open` module function returns an iterator over the property set. Typical
-usage by plugins would be:
+The `parse` module function returns a name/value property table. Typical usage
+by plugins would be:
 
 ```lua
 ec = require("editorconfig_core")
 
-for name, value in ec.open("/full/path/to/file") do
+for name, value in pairs(ec.parse("/full/path/to/file")) do
     configure_property[name](value)
 end
 ```
 
-Alternatively the `parse` module function returns a key/value property table.
-Sometimes it is useful to have the same stable order for each `parse()`
+Sometimes it is useful to have the same stable order for each `parse`
 invocation that the EditorConfig C Core library provides. For that the property
-keys are available as an array in a second return value:
+names are available as an array in a second return value:
 
 ```lua
 prop, names = ec.parse("/full/path/to/file")
