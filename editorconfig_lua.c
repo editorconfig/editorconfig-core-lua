@@ -45,43 +45,6 @@
 
 typedef int err_t;
 
-typedef err_t (push_ec_value_fn)(lua_State *L, const char *value);
-
-enum ec_token {
-    LEC_T_NONE = -1,
-    LEC_T_INDENT_STYLE_TAB,
-    LEC_T_INDENT_STYLE_SPACE,
-    LEC_T_INDENT_SIZE_TAB,
-    LEC_T_END_OF_LINE_LF,
-    LEC_T_END_OF_LINE_CRLF,
-    LEC_T_END_OF_LINE_CR,
-    LEC_T_CHARSET_LATIN1,
-    LEC_T_CHARSET_UTF_8,
-    LEC_T_CHARSET_UTF_16BE,
-    LEC_T_CHARSET_UTF_16LE,
-    LEC_T_MAX_LINE_LENGTH_OFF,
-    _T_NUM_TOKENS
-};
-
-struct lec_token {
-    const char *symbol;
-    const char *value;
-};
-
-struct lec_property {
-    const char *name;
-    enum ec_token *tokens;
-    push_ec_value_fn *push_func;
-};
-
-static int
-token_tostring(lua_State *L)
-{
-    const struct lec_token *t;
-    t = lua_touserdata(L, -1);
-    lua_pushstring(L, t->value);
-    return 1;
-}
 
 static err_t
 push_ec_boolean(lua_State *L, const char *value)
@@ -117,105 +80,14 @@ push_ec_number(lua_State *L, const char *value)
     return E_OK;
 }
 
-static struct lec_token tokens[] = {
-    [LEC_T_INDENT_STYLE_TAB]    = { "INDENT_STYLE_TAB",    "tab"      },
-    [LEC_T_INDENT_STYLE_SPACE]  = { "INDENT_STYLE_SPACE",  "space"    },
-    [LEC_T_INDENT_SIZE_TAB]     = { "INDENT_SIZE_TAB",     "tab"      },
-    [LEC_T_END_OF_LINE_LF]      = { "END_OF_LINE_LF",      "lf"       },
-    [LEC_T_END_OF_LINE_CRLF]    = { "END_OF_LINE_CRLF",    "crlf"     },
-    [LEC_T_END_OF_LINE_CR]      = { "END_OF_LINE_CR",      "cr"       },
-    [LEC_T_CHARSET_LATIN1]      = { "CHARSET_LATIN1",      "latin1"   },
-    [LEC_T_CHARSET_UTF_8]       = { "CHARSET_UTF_8",       "utf-8"    },
-    [LEC_T_CHARSET_UTF_16BE]    = { "CHARSET_UTF_16BE",    "utf-16be" },
-    [LEC_T_CHARSET_UTF_16LE]    = { "CHARSET_UTF_16LE",    "utf-16le" },
-    [LEC_T_MAX_LINE_LENGTH_OFF] = { "MAX_LINE_LENGTH_OFF", "off"      },
-    { NULL, NULL }
-};
-
-static enum ec_token indent_style_tokens[] = {
-    LEC_T_INDENT_STYLE_TAB,
-    LEC_T_INDENT_STYLE_SPACE,
-    LEC_T_NONE
-};
-
-static enum ec_token indent_size_tokens[] = {
-    LEC_T_INDENT_SIZE_TAB,
-    LEC_T_NONE
-};
-
-static enum ec_token end_of_line_tokens[] = {
-    LEC_T_END_OF_LINE_LF,
-    LEC_T_END_OF_LINE_CRLF,
-    LEC_T_END_OF_LINE_CR,
-    LEC_T_NONE
-};
-
-static enum ec_token charset_tokens[] = {
-    LEC_T_CHARSET_LATIN1,
-    LEC_T_CHARSET_UTF_8,
-    LEC_T_CHARSET_UTF_16BE,
-    LEC_T_CHARSET_UTF_16LE,
-    LEC_T_NONE
-};
-
-static enum ec_token max_line_length_tokens[] = {
-    LEC_T_MAX_LINE_LENGTH_OFF,
-    LEC_T_NONE
-};
-
-static struct lec_property properties[] = {
-    { "indent_style",
-        indent_style_tokens, NULL },
-    { "indent_size",
-        indent_size_tokens, push_ec_number },
-    { "tab_width",
-        NULL, push_ec_number },
-    { "end_of_line",
-        end_of_line_tokens, NULL },
-    { "charset",
-        charset_tokens, NULL },
-    { "trim_trailing_whitespace",
-        NULL, push_ec_boolean },
-    { "insert_final_newline",
-        NULL, push_ec_boolean },
-    { "max_line_length",
-        max_line_length_tokens, push_ec_number },
-    { NULL, NULL, NULL }
-};
-
-static err_t
-push_property(lua_State *L, const char *name, const char *value)
+static void
+push_ec_value(lua_State *L, const char *value)
 {
-    const struct lec_property *prop = NULL;
-
-    lua_pushstring(L, name);
-    for (int i = 0; properties[i].name != NULL; i++) {
-        if (strequal(name, properties[i].name)) {
-            prop = &properties[i];
-            break;
-        }
-    }
-    if (prop == NULL) {
-        // Unknown property
-        lua_pushstring(L, value);
-        return E_OK;
-    }
-    if (prop->tokens != NULL) {
-        for (enum ec_token *t = prop->tokens; *t != LEC_T_NONE; t++) {
-            if (strequal(tokens[*t].value, value)) {
-                lua_getfield(L, LUA_REGISTRYINDEX, "EditorConfig.T");
-                lua_getfield(L, -1, tokens[*t].symbol);
-                lua_remove(L, -2);
-                return E_OK;
-            }
-        }
-    }
-    if ((prop->push_func != NULL) &&
-                (prop->push_func(L, value) == E_OK)) {
-        return E_OK;
-    }
-    lua_pop(L, 1);
-    return E_ERROR;
+    if (push_ec_boolean(L, value) == E_OK)
+        return;
+    if (push_ec_number(L, value) == E_OK)
+        return;
+    lua_pushstring(L, value);
 }
 
 /* Receives 3 arguments, two optional */
@@ -259,7 +131,7 @@ open_ec_handle(lua_State *L)
 /* One mandatory argument (file_full_path) */
 /* One optional argument (conf_file_name) */
 /* One optional argument (version_to_set) */
-/* Returns two tables: { keys = values }, { keys } */
+/* Returns two tables: { names = values }, { names } */
 static int
 lec_parse(lua_State *L)
 {
@@ -277,9 +149,8 @@ lec_parse(lua_State *L)
     for (int i = 0; i < name_value_count; i++) {
         name = value = NULL;
         editorconfig_handle_get_name_value(eh, i, &name, &value);
-        if (push_property(L, name, value) != E_OK) {
-            continue; // Skip
-        }
+        lua_pushstring(L, name);
+        push_ec_value(L, value);
         lua_settable(L, 1);
         lua_pushinteger(L, idx);
         lua_pushstring(L, name);
@@ -305,36 +176,13 @@ add_version(lua_State *L)
     lua_setfield(L, -2, "_C_VERSION");
 }
 
-static void
-add_tokens(lua_State *L)
-{
-    struct lec_token *t;
-
-    lua_createtable(L, 0, _T_NUM_TOKENS);
-    for (int i = 0; tokens[i].symbol != NULL; i++) {
-        t = lua_newuserdata(L, sizeof(struct lec_token));
-        *t = tokens[i];
-        luaL_getmetatable(L, "EditorConfig.token");
-        lua_setmetatable(L, -2);
-        lua_setfield(L, -2, tokens[i].symbol);
-    }
-    lua_setfield(L, -2, "T");
-}
-
 static const struct luaL_Reg editorconfig_core[] = {
     {"parse", lec_parse},
     {NULL, NULL}
 };
 
 int luaopen_editorconfig_core (lua_State *L) {
-    luaL_newmetatable(L, "EditorConfig.token");
-    lua_pushcfunction(L, token_tostring);
-    lua_setfield(L, -2, "__tostring");
     luaL_newlib(L, editorconfig_core);
     add_version(L);
-    add_tokens(L);
-    // insert T into registry
-    lua_getfield(L, -1, "T");
-    lua_setfield(L, LUA_REGISTRYINDEX, "EditorConfig.T");
     return 1;
 }

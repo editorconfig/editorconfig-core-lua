@@ -70,5 +70,15 @@ end
 Note also the use of the length operator to retrieve the EditorConfig
 property count for a given file.
 
+#### Lua types
+
+The EditorConfig Lua module returns the following types:
+
+| EditorConfig value | Lua Type  |
+| ------------------ | --------- |
+| `true` and `false` | `boolean` |
+| integer            | `number`  |
+| everything else    | `string`  |
+
 [1]: https://github.com/editorconfig/editorconfig-core-c
 [2]: https://editorconfig.org
