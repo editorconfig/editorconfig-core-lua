@@ -45,7 +45,11 @@
 
 typedef int err_t;
 
-
+/***
+ * Lua bindings to the EditorConfig C Core library.
+ * @module editorconfig_core
+ */
+ 
 static err_t
 push_ec_boolean(lua_State *L, const char *value)
 {
@@ -128,10 +132,15 @@ open_ec_handle(lua_State *L)
     return eh;
 }
 
-/* One mandatory argument (file_full_path) */
-/* One optional argument (conf_file_name) */
-/* One optional argument (version_to_set) */
-/* Returns two tables: { names = values }, { names } */
+/***
+ * Load EditorConfig settings for a file.
+ * @function parse
+ * @string path full path to source file
+ * @string[opt] config configuration file name
+ * @string[opt] version version to set as a string tripe
+ * @treturn {[name]=value,...} a property table
+ * @treturn {name,...} an array with property names
+ */
 static int
 lec_parse(lua_State *L)
 {
@@ -161,6 +170,14 @@ lec_parse(lua_State *L)
     return 2;
 }
 
+/***
+ * Module version
+ * @field _VERSION string "EditorConfig Lua Core version &ltmajor.minor.patch&gt"
+ */
+/***
+ * EditorConfig C Core version
+ * @field _C_VERSION string "EditorConfig C Core version &ltmajor.minor.patch&gt"
+ */
 static void
 add_version(lua_State *L)
 {

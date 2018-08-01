@@ -64,6 +64,11 @@ install(TARGETS editorconfig_core
     DESTINATION ${ECL_LIBDIR}
 )
 
+find_program(LDOC_CMD ldoc)
+add_custom_target(doc
+    COMMAND ${LDOC_CMD} ${CMAKE_SOURCE_DIR}/editorconfig_lua.c
+)
+
 # Testing. Type "make test" to run tests. Only if the test submodule is
 # checked out should we do this.
 if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
