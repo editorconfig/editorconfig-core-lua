@@ -102,8 +102,8 @@ open_ec_handle(lua_State *L)
     int err_num;
 
     file_full_path = luaL_checkstring(L, 1);
-    conf_file_name = luaL_opt(L, luaL_checkstring, 2, NULL);
-    version_to_set = luaL_opt(L, luaL_checkstring, 3, NULL);
+    conf_file_name = luaL_optstring(L, 2, NULL);
+    version_to_set = luaL_optstring(L, 3, NULL);
     eh = editorconfig_handle_init();
     if (eh == NULL) {
         luaL_error(L, "not enough memory to create handle");
