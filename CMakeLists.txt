@@ -45,6 +45,11 @@ add_library(editorconfig_core MODULE editorconfig_lua.c)
 target_compile_definitions(editorconfig_core
     PRIVATE "LEC_VERSION=\"${LEC_VERSION}\""
 )
+if(CMAKE_COMPILER_IS_GNUCC)
+    target_compile_options(editorconfig_core
+        PUBLIC -Wall -Wextra
+    )
+endif()
 target_include_directories(editorconfig_core SYSTEM
     PRIVATE ${EDITORCONFIG_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
 )
