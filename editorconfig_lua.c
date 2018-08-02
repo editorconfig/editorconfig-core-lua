@@ -65,23 +65,19 @@ push_ec_boolean(lua_State *L, const char *value)
 }
 
 static err_t
-push_ec_number(lua_State *L, const char *value)
+push_ec_integer(lua_State *L, const char *value)
 {
     long number;
     const char *nptr = value;
     char *endptr = NULL;
 
     number = strtol(nptr, &endptr, 0);
-    if (*nptr == '\0' || *endptr != '\0') {
-        /* Accept all digits in dec/hex/octal only */
-        return E_ERROR;
+    if (*nptr != '\0' && *endptr == '\0') {
+        /* Accept only all digits in dec/hex/octal */
+        lua_pushinteger(L, (lua_Integer)number);
+        return E_OK;
     }
-    if (number <= 0) {
-        /* Accept positive integers only */
-        return E_ERROR;
-    }
-    lua_pushinteger(L, (lua_Integer)number);
-    return E_OK;
+    return E_ERROR;
 }
 
 static void
@@ -89,7 +85,7 @@ push_ec_value(lua_State *L, const char *value)
 {
     if (push_ec_boolean(L, value) == E_OK)
         return;
-    if (push_ec_number(L, value) == E_OK)
+    if (push_ec_integer(L, value) == E_OK)
         return;
     lua_pushstring(L, value);
 }
