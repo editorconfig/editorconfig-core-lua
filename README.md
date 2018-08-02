@@ -80,5 +80,15 @@ The EditorConfig Lua module returns the following types:
 | integer            | `number`  |
 | everything else    | `string`  |
 
+## Note on API stability
+
+Version 0.3.0 introduced major backward incompatibilities.
+
+* The `open`function was removed (commit 0c2a6615de190b4f264dd051de10eef1d2664154).
+* Keywords are returned as Lua strings instead of userdata objects from the
+`_T` table (commit 23409d9814db14d514d611c638740e11d2b7faeb).
+
+Please update accordingly.
+
 [1]: https://github.com/editorconfig/editorconfig-core-c
 [2]: https://editorconfig.org
