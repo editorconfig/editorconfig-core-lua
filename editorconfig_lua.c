@@ -36,15 +36,6 @@
 #error "LEC_VERSION is not defined."
 #endif
 
-#define strequal(s1, s2) \
-    (strcmp((s1), (s2)) == 0)
-
-#define E_OK         1
-#define E_NULL       0
-#define E_ERROR     -1
-
-typedef int err_t;
-
 /***
  * Lua bindings to the EditorConfig C Core library.
  * @module editorconfig_core
