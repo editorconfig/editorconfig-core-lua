@@ -84,9 +84,9 @@ The EditorConfig Lua module returns the following types:
 
 Version 0.3.0 introduced major backward incompatibilities.
 
-* The `open`function was removed (commit [g0c2a661](0c2a6615de190b4f264dd051de10eef1d2664154)).
+* The `open`function was removed.
 * Keywords are returned as Lua strings instead of userdata objects from the
-`_T` table (commit [g1f308d1](1f308d1fada117ad3ad42fe8c7aad0f1371e3e97)).
+`_T` table.
 
 Please update accordingly.
 
