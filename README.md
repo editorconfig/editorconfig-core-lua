@@ -70,23 +70,12 @@ end
 Note also the use of the length operator to retrieve the EditorConfig
 property count for a given file.
 
-#### Lua types
-
-The EditorConfig Lua module returns the following types:
-
-| EditorConfig value | Lua Type  |
-| ------------------ | --------- |
-| `true` and `false` | `boolean` |
-| integer            | `number`  |
-| everything else    | `string`  |
-
-## Note on API stability
+#### Note on API stability
 
 Version 0.3.0 introduced major backward incompatibilities.
 
 * The `open`function was removed.
-* Keywords are returned as Lua strings instead of userdata objects from the
-`_T` table.
+* Every EditorConfig value has the Lua type `string`. 
 
 Please update accordingly.
 

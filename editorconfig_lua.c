@@ -50,46 +50,6 @@ typedef int err_t;
  * @module editorconfig_core
  */
  
-static err_t
-push_ec_boolean(lua_State *L, const char *value)
-{
-    if (strequal(value, "true")) {
-        lua_pushboolean(L, 1);
-        return E_OK;
-    }
-    if (strequal(value, "false")) {
-        lua_pushboolean(L, 0);
-        return E_OK;
-    }
-    return E_ERROR;
-}
-
-static err_t
-push_ec_integer(lua_State *L, const char *value)
-{
-    long number;
-    const char *nptr = value;
-    char *endptr = NULL;
-
-    number = strtol(nptr, &endptr, 0);
-    if (*nptr != '\0' && *endptr == '\0') {
-        /* Accept only all digits in dec/hex/octal */
-        lua_pushinteger(L, (lua_Integer)number);
-        return E_OK;
-    }
-    return E_ERROR;
-}
-
-static void
-push_ec_value(lua_State *L, const char *value)
-{
-    if (push_ec_boolean(L, value) == E_OK)
-        return;
-    if (push_ec_integer(L, value) == E_OK)
-        return;
-    lua_pushstring(L, value);
-}
-
 /* Receives 3 arguments, two optional */
 static editorconfig_handle
 open_ec_handle(lua_State *L)
@@ -155,7 +115,7 @@ lec_parse(lua_State *L)
         name = value = NULL;
         editorconfig_handle_get_name_value(eh, i, &name, &value);
         lua_pushstring(L, name);
-        push_ec_value(L, value);
+        lua_pushstring(L, value);
         lua_settable(L, 1);
         lua_pushinteger(L, idx);
         lua_pushstring(L, name);
