@@ -41,31 +41,32 @@ find_package(Lua REQUIRED)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRE ON)
 
-add_library(editorconfig_core MODULE editorconfig_lua.c)
-target_compile_definitions(editorconfig_core
+add_library(editorconfig_lua MODULE editorconfig_lua.c)
+target_compile_definitions(editorconfig_lua
     PRIVATE "LEC_VERSION=\"${LEC_VERSION}\""
 )
 if(CMAKE_COMPILER_IS_GNUCC)
-    target_compile_options(editorconfig_core
+    target_compile_options(editorconfig_lua
         PUBLIC -Wall -Wextra
     )
 endif()
-target_include_directories(editorconfig_core SYSTEM
+target_include_directories(editorconfig_lua SYSTEM
     PRIVATE ${EDITORCONFIG_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
 )
-target_link_libraries(editorconfig_core
+target_link_libraries(editorconfig_lua
     ${EDITORCONFIG_LIBRARIES}
 )
 # Omit the lib<name>.so prefix from the DSO
-set_target_properties(editorconfig_core PROPERTIES
+set_target_properties(editorconfig_lua PROPERTIES
     PREFIX ""
+    OUTPUT_NAME "editorconfig"
 )
 
 set(ECL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/lua/${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}"
     CACHE PATH "Target installation directory."
 )
 
-install(TARGETS editorconfig_core
+install(TARGETS editorconfig_lua
     DESTINATION ${ECL_LIBDIR}
 )
 

@@ -38,7 +38,7 @@
 
 /***
  * Lua bindings to the EditorConfig C Core library.
- * @module editorconfig_core
+ * @module editorconfig
  */
  
 /* Receives 3 arguments, two optional */
@@ -140,13 +140,13 @@ add_version(lua_State *L)
     lua_setfield(L, -2, "_C_VERSION");
 }
 
-static const struct luaL_Reg editorconfig_core[] = {
+static const struct luaL_Reg editorconfig_reg[] = {
     {"parse", lec_parse},
     {NULL, NULL}
 };
 
-int luaopen_editorconfig_core (lua_State *L) {
-    luaL_newlib(L, editorconfig_core);
+int luaopen_editorconfig (lua_State *L) {
+    luaL_newlib(L, editorconfig_reg);
     add_version(L);
     return 1;
 }

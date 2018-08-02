@@ -36,7 +36,7 @@ make
 make test   # optional
 ```
 
-Then copy the `editorconfig_core.so` binary module to somewhere in
+Then copy the `editorconfig.so` binary module to somewhere in
 your `LUA_CPATH`.
 
 To be able to run the tests you may have to update the git submodule
@@ -48,7 +48,7 @@ The `parse` module function returns a name/value property table. Typical usage
 by plugins would be:
 
 ```lua
-ec = require("editorconfig_core")
+ec = require("editorconfig")
 
 for name, value in pairs(ec.parse("/full/path/to/file")) do
     configure_property[name](value)
@@ -75,7 +75,8 @@ property count for a given file.
 Version 0.3.0 introduced major backward incompatibilities.
 
 * The `open`function was removed.
-* Every EditorConfig value has the Lua type `string`. 
+* Every EditorConfig value has the Lua type `string`.
+* Lua module renamed to `editorconfig`. 
 
 Please update accordingly.
 
