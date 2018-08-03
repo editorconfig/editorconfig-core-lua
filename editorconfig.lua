@@ -1,6 +1,6 @@
 
 require("pl")
-ec = require("editorconfig_core")
+ec = require("editorconfig")
 
 local progname = arg[0]
 
