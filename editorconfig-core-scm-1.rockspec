@@ -20,6 +20,7 @@ dependencies = {
 build = {
     type = "cmake",
     variables = {
+        CMAKE_BUILD_TYPE = "Release",
         CMAKE_INSTALL_PREFIX = "$(PREFIX)",
         ECL_LIBDIR = "$(LIBDIR)",
     },
