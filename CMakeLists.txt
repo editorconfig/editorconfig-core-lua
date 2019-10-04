@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(editorconfig-core-lua VERSION 0.3.0 LANGUAGES C)
 
-set(LEC_VERSION "${PROJECT_VERSION}-git")
+set(LEC_VERSION "${PROJECT_VERSION}")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 include(FindEditorConfig)
