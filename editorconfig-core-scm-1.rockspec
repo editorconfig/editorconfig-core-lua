@@ -1,7 +1,10 @@
 package = "editorconfig-core"
+-- version = @VERSION@-@PKGREL@
 version = "scm-1"
 source = {
-    url = "git://github.com/editorconfig/editorconfig-core-lua.git"
+--    url = "https://github.com/editorconfig/editorconfig-core-lua/archive/v@VERSION@.tar.gz",
+--    dir = "editorconfig-core-lua-@VERSION@",
+    url = "git://github.com/editorconfig/editorconfig-core-lua.git",
 }
 description = {
     summary = "EditorConfig support for the Lua language",
