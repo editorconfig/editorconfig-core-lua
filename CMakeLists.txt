@@ -80,8 +80,8 @@ add_custom_target(doc
 if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
     enable_testing()
     find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
-    configure_file(test_ec.sh.in test_ec.sh @ONLY)
-    set(EDITORCONFIG_CMD ${CMAKE_BINARY_DIR}/test_ec.sh)
+    configure_file(test.lua.in test.lua @ONLY)
+    set(EDITORCONFIG_CMD ${LUA_CMD} ${CMAKE_BINARY_DIR}/test.lua)
     add_subdirectory(tests)
 else()
     message(WARNING

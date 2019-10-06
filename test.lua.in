@@ -1,0 +1,6 @@
+#!/bin/env lua
+
+package.path = "@CMAKE_SOURCE_DIR@/?.lua;" .. package.path
+package.cpath = "@CMAKE_BINARY_DIR@/?.so;" .. package.cpath
+
+dofile("@CMAKE_SOURCE_DIR@/main.lua")
