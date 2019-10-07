@@ -30,7 +30,7 @@ project(editorconfig-core-lua VERSION 0.3.1 LANGUAGES C)
 
 set(LEC_VERSION "${PROJECT_VERSION}-git")
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 include(FindEditorConfig)
 include(GNUInstallDirs)
 
