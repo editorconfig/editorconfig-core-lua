@@ -32,8 +32,8 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#ifndef LEC_VERSION
-#error "LEC_VERSION is not defined."
+#ifndef ECL_VERSION
+#error "ECL_VERSION is not defined."
 #endif
 
 /***
@@ -132,7 +132,7 @@ add_version(lua_State *L)
     const char *fmt;
 
     fmt = "EditorConfig Lua Core Version %s";
-    lua_pushfstring(L, fmt, LEC_VERSION);
+    lua_pushfstring(L, fmt, ECL_VERSION);
     lua_setfield(L, -2, "_VERSION");
     editorconfig_get_version(&major, &minor, &patch);
     fmt = "EditorConfig C Core Version %d.%d.%d";

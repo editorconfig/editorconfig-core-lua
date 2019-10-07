@@ -28,12 +28,12 @@ cmake_minimum_required(VERSION 3.0)
 
 project(editorconfig-core-lua VERSION 0.3.1 LANGUAGES C)
 
-set(LEC_VERSION "${PROJECT_VERSION}-git")
+set(ECL_VERSION "${PROJECT_VERSION}-git")
 
 option(ENABLE_TESTS "Enable running the test suite" OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
-include(FindEditorConfig)
+
 include(GNUInstallDirs)
 
 find_package(EditorConfig REQUIRED)
@@ -45,7 +45,7 @@ set(CMAKE_C_STANDARD_REQUIRE ON)
 
 add_library(editorconfig_lua MODULE editorconfig_lua.c)
 target_compile_definitions(editorconfig_lua
-    PRIVATE "LEC_VERSION=\"${LEC_VERSION}\""
+    PRIVATE "ECL_VERSION=\"${ECL_VERSION}\""
 )
 if(CMAKE_COMPILER_IS_GNUCC)
     target_compile_options(editorconfig_lua
@@ -58,8 +58,8 @@ target_include_directories(editorconfig_lua SYSTEM
 target_link_libraries(editorconfig_lua
     ${EDITORCONFIG_LIBRARIES}
 )
-# Omit the lib<name>.so prefix from the DSO
 set_target_properties(editorconfig_lua PROPERTIES
+    # Omit the lib<name>.so prefix from the DSO
     PREFIX ""
     OUTPUT_NAME "editorconfig"
 )
