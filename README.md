@@ -22,9 +22,10 @@ cd build
 cmake ..
 make
 make test   # optional
+sudo make install
 ```
 
-Then copy the `editorconfig.so` binary module to somewhere in
+Or just copy the `editorconfig.so` binary module to somewhere in
 your `LUA_CPATH`.
 
 To be able to run the tests you may have to update the git submodule
@@ -35,7 +36,7 @@ with `git submodule update --init`.
 You can also install the latest release using [LuaRocks][3]:
 
 ```
-luarocks --local install editorconfig-core
+luarocks [--local] install editorconfig-core
 ```
 
 ## Usage
