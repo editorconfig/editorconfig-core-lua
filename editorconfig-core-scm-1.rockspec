@@ -1,9 +1,11 @@
 package = "editorconfig-core"
--- version = @VERSION@-@PKGREL@
-version = "scm-1"
+-- local _version = @VERSION@
+local _version = "scm"
+local _pkgrel = "1"
+version = _version .. "-" .. _pkgrel
 source = {
---    url = "https://github.com/editorconfig/editorconfig-core-lua/archive/v@VERSION@.tar.gz",
---    dir = "editorconfig-core-lua-@VERSION@",
+--    url = "https://github.com/editorconfig/editorconfig-core-lua/archive/v" .. _version .. ".tar.gz",
+--    dir = "editorconfig-core-lua-" .. _version,
     url = "git://github.com/editorconfig/editorconfig-core-lua.git",
 }
 description = {
