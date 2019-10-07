@@ -21,15 +21,11 @@ mkdir build
 cd build
 cmake ..
 make
-make test   # optional
 sudo make install
 ```
 
 Or just copy the `editorconfig.so` binary module to somewhere in
 your `LUA_CPATH`.
-
-To be able to run the tests you may have to update the git submodule
-with `git submodule update --init`.
 
 #### Install using LuaRocks
 

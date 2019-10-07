@@ -30,6 +30,8 @@ project(editorconfig-core-lua VERSION 0.3.1 LANGUAGES C)
 
 set(LEC_VERSION "${PROJECT_VERSION}-git")
 
+option(ENABLE_TESTS "Enable running the test suite" OFF)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 include(FindEditorConfig)
 include(GNUInstallDirs)
@@ -77,13 +79,15 @@ add_custom_target(doc
 
 # Testing. Type "make test" to run tests. Only if the test submodule is
 # checked out should we do this.
-if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
-    enable_testing()
-    find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
-    configure_file(test.lua.in test.lua @ONLY)
-    set(EDITORCONFIG_CMD ${LUA_CMD} ${CMAKE_BINARY_DIR}/test.lua)
-    add_subdirectory(tests)
-else()
-    message(WARNING
-        "Testing files not found. Testing will not be available. If you obtained the source tree through git, please run 'git submodule update --init' to update the tests submodule.")
+if(ENABLE_TESTS)
+    if(EXISTS ${CMAKE_SOURCE_DIR}/tests/CMakeLists.txt)
+        enable_testing()
+        find_program(LUA_CMD lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR})
+        configure_file(test.lua.in test.lua @ONLY)
+        set(EDITORCONFIG_CMD ${LUA_CMD} ${CMAKE_BINARY_DIR}/test.lua)
+        add_subdirectory(tests)
+    else()
+        message(WARNING
+            "Testing files not found. Testing will not be available. If you obtained the source tree through git, please run 'git submodule update --init' to update the tests submodule.")
+    endif()
 endif()

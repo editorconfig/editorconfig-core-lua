@@ -26,5 +26,6 @@ build = {
         CMAKE_BUILD_TYPE = "Release",
         CMAKE_INSTALL_PREFIX = "$(PREFIX)",
         ECL_LIBDIR = "$(LIBDIR)",
+        ENABLE_TESTS = "Off",
     },
 }
