@@ -31,6 +31,11 @@ project(editorconfig-core-lua VERSION 0.3.1 LANGUAGES C)
 
 set(ECL_VERSION "${PROJECT_VERSION}-git")
 
+#
+# EditorConfig Core Lua is a very thin shim around the EditorConfig C
+# Library. The vast majority if not all test failures will be because
+# the C library version being used is failing the test as well.
+#
 option(ENABLE_TESTS "Enable running the test suite" OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
