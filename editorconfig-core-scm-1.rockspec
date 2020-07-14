@@ -1,7 +1,12 @@
 package = "editorconfig-core"
-version = "scm-1"
+-- local _version = @VERSION@
+local _version = "scm"
+local _pkgrel = "1"
+version = _version .. "-" .. _pkgrel
 source = {
-    url = "git://github.com/editorconfig/editorconfig-core-lua.git"
+--    url = "https://github.com/editorconfig/editorconfig-core-lua/archive/v" .. _version .. ".tar.gz",
+--    dir = "editorconfig-core-lua-" .. _version,
+    url = "git://github.com/editorconfig/editorconfig-core-lua.git",
 }
 description = {
     summary = "EditorConfig support for the Lua language",
@@ -20,7 +25,9 @@ dependencies = {
 build = {
     type = "cmake",
     variables = {
+        CMAKE_BUILD_TYPE = "Release",
         CMAKE_INSTALL_PREFIX = "$(PREFIX)",
         ECL_LIBDIR = "$(LIBDIR)",
+        ENABLE_TESTS = "Off",
     },
 }

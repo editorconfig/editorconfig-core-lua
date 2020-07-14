@@ -14,18 +14,6 @@ website.
 
 ## Installation
 
-#### Build using LuaRocks
-
-```
-luarocks make --pack-binary-rock
-```
-
-Then install the binary rock file, e.g:
-
-```
-luarocks --local install editorconfig-core-scm-1.linux-x86_64.rock
-```
-
 #### Build using CMake
 
 ```
@@ -33,14 +21,19 @@ mkdir build
 cd build
 cmake ..
 make
-make test   # optional
+sudo make install
 ```
 
-Then copy the `editorconfig.so` binary module to somewhere in
+Or just copy the `editorconfig.so` binary module to somewhere in
 your `LUA_CPATH`.
 
-To be able to run the tests you may have to update the git submodule
-with `git submodule update --init`.
+#### Install using LuaRocks
+
+You can also install the latest release using [LuaRocks][3]:
+
+```
+luarocks [--local] install editorconfig-core
+```
 
 ## Usage
 
@@ -82,3 +75,4 @@ Please update accordingly.
 
 [1]: https://github.com/editorconfig/editorconfig-core-c
 [2]: https://editorconfig.org
+[3]: https://luarocks.org
