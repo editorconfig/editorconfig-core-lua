@@ -63,6 +63,7 @@ target_include_directories(editorconfig_lua SYSTEM
 )
 target_link_libraries(editorconfig_lua
     ${EDITORCONFIG_LIBRARIES}
+    ${LUA_LIBRARIES}
 )
 set_target_properties(editorconfig_lua PROPERTIES
     # Omit the lib<name>.so prefix from the DSO
