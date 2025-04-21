@@ -16,7 +16,7 @@ betweendifferent projects. The EditorConfig project maintains a file \z
 format and plugins for various text editors which allow this file \z
 format to be read and used by those editors. EditorConfig Lua Core \z
 provides the same functionality as the Editorconfig C Core library.",
-    homepage = "http://editorconfig.org",
+    homepage = "https://editorconfig.org",
     license = "BSD",
 }
 dependencies = {
