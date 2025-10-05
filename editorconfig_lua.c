@@ -6,10 +6,10 @@
  * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
+ * this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -34,6 +34,28 @@
 
 #ifndef ECL_VERSION
 #error "ECL_VERSION is not defined."
+#endif
+
+#if LUA_VERSION_NUM < 502
+/*
+ * Lua 5.1 compatibility functions.
+ * Adapted from Lua 5.2.x source.
+ */
+static void
+luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
+{
+    luaL_checkstack(L, nup, "too many upvalues");
+    for (; l->name; l++) {
+        int i;
+        for (i = 0; i < nup; i++)
+            lua_pushvalue(L, -nup);
+        lua_pushcclosure(L, l->func, nup);
+        lua_setfield(L, -(nup + 2), l->name);
+    }
+    lua_pop(L, nup);
+}
+
+#define luaL_newlib(L, l) (lua_newtable(L), luaL_setfuncs(L, l, 0))
 #endif
 
 /***
@@ -94,7 +116,7 @@ lec_parse(lua_State *L)
     editorconfig_handle eh;
     int name_value_count;
     const char *name, *value;
-    lua_Integer idx = 1;
+    lua_Number idx = 1; /* Use lua_Number for Lua 5.1 compatibility */
 
     eh = open_ec_handle(L);
     assert(eh != NULL);
@@ -108,7 +130,7 @@ lec_parse(lua_State *L)
         lua_pushstring(L, name);
         lua_pushstring(L, value);
         lua_settable(L, 1);
-        lua_pushinteger(L, idx);
+        lua_pushnumber(L, idx); /* Use lua_pushnumber for Lua 5.1 compatibility */
         lua_pushstring(L, name);
         lua_settable(L, 2);
         idx += 1;
