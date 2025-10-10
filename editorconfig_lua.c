@@ -41,7 +41,7 @@
  * Lua 5.1 compatibility functions.
  * Adapted from Lua 5.2.x source.
  */
-static void
+void
 luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
 {
     luaL_checkstack(L, nup, "too many upvalues");
@@ -55,14 +55,16 @@ luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
     lua_pop(L, nup);
 }
 
+#ifndef luaL_newlib
 #define luaL_newlib(L, l) (lua_newtable(L), luaL_setfuncs(L, l, 0))
+#endif
 #endif
 
 /***
  * Lua bindings to the EditorConfig C Core library.
  * @module editorconfig
  */
- 
+
 /* Receives 3 arguments, two optional */
 static editorconfig_handle
 open_ec_handle(lua_State *L)
