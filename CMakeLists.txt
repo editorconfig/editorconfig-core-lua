@@ -43,7 +43,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 include(GNUInstallDirs)
 
 find_package(EditorConfig REQUIRED)
-set(Lua_FIND_VERSION 5.2) # minimum Lua version
+set(Lua_FIND_VERSION 5.1) # minimum Lua version
 find_package(Lua REQUIRED)
 
 set(CMAKE_C_STANDARD 99)

@@ -20,7 +20,7 @@ provides the same functionality as the Editorconfig C Core library.",
     license = "BSD",
 }
 dependencies = {
-    "lua >= 5.2",
+    "lua >= 5.1",
 }
 build = {
     type = "cmake",
